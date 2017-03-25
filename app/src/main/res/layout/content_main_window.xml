@@ -13,4 +13,15 @@
     tools:context="com.proximosolutions.nvoyadmin.MainWindow"
     tools:showIn="@layout/app_bar_main_window">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/nvoy_logo_admin"
+        android:id="@+id/imageView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="false"
+        android:visibility="invisible"
+        android:alpha="10" />
 </RelativeLayout>

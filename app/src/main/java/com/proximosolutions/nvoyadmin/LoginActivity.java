@@ -86,39 +86,42 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if (user != null) {
                     // User is signed in
                    // Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Toast.makeText(LoginActivity.this, "Authentication success.",
+                            Toast.LENGTH_SHORT).show();
+                    Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
+                    startActivity(mainWindow);
                 } else {
-                    // User is signed out
-                   // Log.d(TAG, "onAuthStateChanged:signed_out");
+                    mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+                    populateAutoComplete();
+
+                    mPasswordView = (EditText) findViewById(R.id.password);
+                    mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                        @Override
+                        public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                            if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                                attemptLogin();
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+
+                    Button mEmailSignInButton = (Button) findViewById(email_sign_in_button);
+                    mEmailSignInButton.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            attemptLogin();
+                        }
+                    });
+
+                    mLoginFormView = findViewById(R.id.login_form);
+                    mProgressView = findViewById(R.id.login_progress);
                 }
                 // ...
             }
         };
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Button mEmailSignInButton = (Button) findViewById(email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
 
 
 
