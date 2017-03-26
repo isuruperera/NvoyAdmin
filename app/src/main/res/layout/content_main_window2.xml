@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_main_window"
+    android:id="@+id/content_main_window2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -10,18 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.proximosolutions.nvoyadmin.Controller.MainWindow"
-    tools:showIn="@layout/app_bar_main_window">
+    tools:context="com.proximosolutions.nvoyadmin.Controller.MainWindowActivity"
+    tools:showIn="@layout/activity_main_window2">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/nvoy_logo_admin"
-        android:id="@+id/imageView2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:adjustViewBounds="false"
-        android:visibility="invisible"
-        android:alpha="10" />
 </RelativeLayout>

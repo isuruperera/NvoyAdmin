@@ -1,4 +1,4 @@
-package com.proximosolutions.nvoyadmin;
+package com.proximosolutions.nvoyadmin.Controller;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,6 +37,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.proximosolutions.nvoyadmin.MainLogic.Nvoy;
+import com.proximosolutions.nvoyadmin.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +66,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    //private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -89,6 +91,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Toast.makeText(LoginActivity.this, "Authentication success.",
                             Toast.LENGTH_SHORT).show();
                     Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
+                    //Nvoy nvoy = new Nvoy();
+                    //mainWindow.
                     startActivity(mainWindow);
                 } else {
                     mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -120,7 +124,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // ...
             }
         };
-        // Set up the login form.
+
 
 
 
@@ -375,7 +379,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    /*public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
@@ -385,7 +389,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
         }
 
-        @Override
+        *//*@Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
@@ -406,9 +410,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             // TODO: register the new account here.
             return true;
-        }
+        }*/
 
-        @Override
+        /*@Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
@@ -425,7 +429,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
-        }
-    }
+        }*/
+    //}
 }
 
