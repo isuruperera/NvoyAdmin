@@ -9,7 +9,8 @@ public class NvoyUser {
     private String firstName;
     private String lastName;
     private String contactNumber;
-    private String NIC;
+    private String nic;
+    private boolean isActive = true;
 
 
     public String getUserID() {
@@ -44,11 +45,21 @@ public class NvoyUser {
         this.contactNumber = contactNumber;
     }
 
-    public String getNIC() {
-        return NIC;
+
+
+    public boolean isActive() {
+        return isActive;
     }
 
-    public void setNIC(String NIC) {
-        this.NIC = NIC;
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
     }
 }

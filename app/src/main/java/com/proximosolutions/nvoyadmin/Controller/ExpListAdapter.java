@@ -2,6 +2,7 @@ package com.proximosolutions.nvoyadmin.Controller;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.proximosolutions.nvoyadmin.MainLogic.NvoyUser;
 import com.proximosolutions.nvoyadmin.R;
 
 import java.util.ArrayList;
+
+import static com.proximosolutions.nvoyadmin.Controller.IntentLock.lockActivity;
+import static com.proximosolutions.nvoyadmin.Controller.IntentLock.lockIntent;
 
 /**
  * Created by Isuru Tharanga on 3/26/2017.
@@ -111,8 +121,56 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                         /*Toast.makeText( finalConvertView.getContext()
                                 ,childText.getText()
                                 ,Toast.LENGTH_SHORT).show();*/
-                        Intent userProfile = new Intent(finalConvertView.getContext(),UserProfile.class);
-                        context.startActivity(userProfile);
+
+                        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                        DatabaseReference databaseReference = firebaseDatabase.getReference();
+
+                        //android.app.FragmentManager fragmentManager = MainWindow.getFragmentManager();
+                        //final ValueEventListener valueEventListener =
+                        String str = childText.getText().toString();
+
+                       databaseReference.child("Couriers").child(EncodeString(childText.getText().toString().trim())).addValueEventListener(new ValueEventListener(){
+
+
+                           @Override
+                           public void onDataChange(DataSnapshot dataSnapshot) {
+
+                               System.out.println("---------------------------------------------------KKKKKKKKKKKKKK-----------------------------");
+                               //lockActivity
+                                    Object o = this;
+
+                                   FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                   DatabaseReference databaseReference = firebaseDatabase.getReference();
+
+                                   Intent userProfile = new Intent(finalConvertView.getContext(),UserProfile.class);
+                                   NvoyUser user = dataSnapshot.getValue(NvoyUser.class);
+
+                                   //Iterable<DataSnapshot> snap = dataSnapshot.getChildren();
+//                                   System.out.println((user.getFirstName()+" "+user.getLastName()));
+                                   userProfile.putExtra("userName",(user.getFirstName()+" "+user.getLastName()));
+                                   userProfile.putExtra("email",DecodeString(user.getUserID()));
+                                   userProfile.putExtra("contact_no",user.getContactNumber());
+                                   userProfile.putExtra("nic",user.getNic());
+                                   userProfile.putExtra("isActive",user.isActive());
+                                   //lockActivity = false;
+                                   databaseReference.child("Couriers").child(EncodeString(childText.getText().toString().trim())).removeEventListener(this);
+                                   context.startActivity(userProfile);
+
+
+
+
+                           }
+
+                           @Override
+                           public void onCancelled(DatabaseError databaseError) {
+
+                           }
+
+
+
+                       });
+
+
 
                     }
                 }
@@ -122,6 +180,14 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
 
         System.out.println(((TextView)convertView.findViewById(R.id.child_text)).getText().toString());
         return convertView;
+    }
+
+    public static String EncodeString(String string) {
+        return string.replace(".", ",");
+    }
+
+    public static String DecodeString(String string) {
+        return string.replace(",", ".");
     }
 
     @Override

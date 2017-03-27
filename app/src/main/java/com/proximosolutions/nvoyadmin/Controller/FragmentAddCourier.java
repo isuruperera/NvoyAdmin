@@ -61,7 +61,7 @@ public class FragmentAddCourier extends Fragment {
                 courier.setFirstName(((TextView)addCourier.findViewById(firstName)).getText().toString());
                 courier.setLastName(((TextView)addCourier.findViewById(lastName)).getText().toString());
                 courier.setContactNumber(((TextView)addCourier.findViewById(contact_no)).getText().toString());
-                courier.setNIC(((TextView)addCourier.findViewById(national_ic)).getText().toString());
+                courier.setNic(((TextView)addCourier.findViewById(national_ic)).getText().toString());
                 courier.setExpressCourier(((CheckBox)addCourier.findViewById(expressCourier)).isChecked());
                 addCourier(courier);
                 ((TextView)addCourier.findViewById(email_address)).setText("");
@@ -83,7 +83,7 @@ public class FragmentAddCourier extends Fragment {
 
     public void addCourier(Courier courier){
         mAuth = FirebaseAuth.getInstance();
-        mAuth.createUserWithEmailAndPassword(DecodeString(courier.getUserID()), courier.getNIC());
+        mAuth.createUserWithEmailAndPassword(DecodeString(courier.getUserID()), courier.getNic());
 
 
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
