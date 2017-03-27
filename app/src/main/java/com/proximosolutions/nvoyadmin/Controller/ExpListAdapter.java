@@ -1,6 +1,7 @@
 package com.proximosolutions.nvoyadmin.Controller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +39,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return parentRowList.get(groupPosition).getChildList().size();
+        return 1;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return parentRowList.get(groupPosition).getChildList().get(childPosition);
+        return parentRowList.get(groupPosition).getChild();
     }
 
     @Override
@@ -58,7 +59,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
+        return 0;
     }
 
     @Override
@@ -85,32 +86,41 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup viewGroup) {
         ChildRow childRow = (ChildRow)getChild(groupPosition,childPosition);
+        System.out.println(groupPosition+" "+childPosition);
         if(convertView==null){
             LayoutInflater layoutInflater = (LayoutInflater)context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.child_row,null);
-
-            ImageView childIcon = (ImageView)convertView.findViewById(R.id.child_icon);
-            childIcon.setImageResource(R.mipmap.ic_launcher);
-
-            final TextView childText = (TextView)convertView.findViewById(R.id.child_text);
-            childText.setText(childRow.getText().trim());
-
-            final View finalConvertView = convertView;
-            childText.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Toast.makeText( finalConvertView.getContext()
-                            ,childText.getText()
-                            ,Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-            );
-
         }
 
+
+        ImageView childIcon = (ImageView)convertView.findViewById(R.id.child_icon);
+        childIcon.setImageResource(R.drawable.ic_menu_courier_payments);
+
+        final TextView childText = (TextView)convertView.findViewById(R.id.child_text);
+        String text = childRow.getText().trim();
+        System.out.println(text);
+        ((TextView)convertView.findViewById(R.id.child_text)).setText(text);
+
+        final View finalConvertView = convertView;
+
+        childText.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        /*Toast.makeText( finalConvertView.getContext()
+                                ,childText.getText()
+                                ,Toast.LENGTH_SHORT).show();*/
+                        Intent userProfile = new Intent(finalConvertView.getContext(),UserProfile.class);
+                        context.startActivity(userProfile);
+
+                    }
+                }
+
+        );
+
+
+        System.out.println(((TextView)convertView.findViewById(R.id.child_text)).getText().toString());
         return convertView;
     }
 
@@ -122,11 +132,17 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
     public void filterData(String query){
         query = query.toLowerCase();
         parentRowList.clear();
-        if(query.isEmpty()){
+        if(query.isEmpty() || query.equals("")){
             parentRowList.addAll(originalList);
         }else{
             for(ParentRow parentRow:originalList){
-                ArrayList<ChildRow> childList = parentRow.getChildList();
+                if(parentRow.getChild().getText().toLowerCase().contains(query)){
+                    parentRowList.add(parentRow);
+                }
+
+
+
+                /*C childList = parentRow.getChildList();
                 ArrayList<ChildRow> newList = new ArrayList<ChildRow>();
 
                 for(ChildRow childRow:childList){
@@ -139,7 +155,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                     ParentRow nParentRow = new ParentRow(parentRow.getName(),newList);
                     parentRowList.add(nParentRow);
 
-                }
+                }*/
             }
 
         }

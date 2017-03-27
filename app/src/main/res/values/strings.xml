@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NvoyAdmin</string>
+    <string name="app_name">Nvoy Admin</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

@@ -29,7 +29,7 @@ import com.proximosolutions.nvoyadmin.R;
 
 import java.util.ArrayList;
 
-public class MainWindowActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+public class SuspendCourier extends AppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private SearchManager searchManager;
     private SearchView searchView;
@@ -76,19 +76,20 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
                     String email = tempCourier.getUserID();
                     email = DecodeString(email);
 
-                    ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
+                    //ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
+                    ChildRow childRow = new ChildRow(email,R.drawable.ic_menu_courier_payments);
                     ParentRow parentRow = null;
 
-                    childRows.add(new ChildRow(email,R.drawable.ic_menu_courier_payments));
+                    //childRows.add(new ChildRow(email,R.drawable.ic_menu_courier_payments));
                     //childRows.add(new ChildRow("AAAABBBBBBBB",R.drawable.ic_menu_courier_payments));
-                    parentRow = new ParentRow(name, childRows);
+                    parentRow = new ParentRow(name, childRow);
                     parentList.add(parentRow);
 
 
 
                 }
                 listView = (ExpandableListView)findViewById(R.id.expandable_list_search);
-                expListAdapter = new ExpListAdapter(MainWindowActivity.this,parentList);
+                expListAdapter = new ExpListAdapter(SuspendCourier.this,parentList);
                 listView.setAdapter(expListAdapter);
                 //displayList();
             }
@@ -100,7 +101,7 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
         });
 
 
-        //expandAll();
+        expandAll();
 
     }
 
@@ -149,7 +150,7 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
         return false;
     }
 
-    private void loadData(){
+/*    private void loadData(){
         ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
         ParentRow parentRow = null;
 
@@ -176,7 +177,7 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
         parentList.add(parentRow);
 
 
-    }
+    }*/
 
     private void expandAll(){
         int count = expListAdapter.getGroupCount();
@@ -188,7 +189,7 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
     private void displayList(){
         //loadData();
         listView = (ExpandableListView)findViewById(R.id.expandable_list_search);
-        expListAdapter = new ExpListAdapter(MainWindowActivity.this,parentList);
+        expListAdapter = new ExpListAdapter(SuspendCourier.this,parentList);
         listView.setAdapter(expListAdapter);
     }
 
@@ -200,7 +201,7 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -233,7 +234,7 @@ public class MainWindowActivity extends AppCompatActivity implements SearchView.
             }
 
             //return super.onOptionsItemSelected(item);
-        }
+        }*/
         return true;
     }
 

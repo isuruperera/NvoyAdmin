@@ -60,6 +60,7 @@ public class MainWindow extends AppCompatActivity
     private ArrayList<ParentRow> parentList = new ArrayList<ParentRow>();
     private ArrayList<ParentRow> showTheseParentList = new ArrayList<ParentRow>();
     private MenuItem searchItem;
+    FragmentSuspendCourier f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class MainWindow extends AppCompatActivity
         setContentView(R.layout.activity_main_window);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        f = new FragmentSuspendCourier();
         /*//FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,12 +109,13 @@ public class MainWindow extends AppCompatActivity
                     String email = tempCourier.getUserID();
                     email = DecodeString(email);
 
-                    ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
+                    //ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
+                    ChildRow childRow = new ChildRow(email,R.drawable.ic_menu_courier_payments);
                     ParentRow parentRow = null;
 
-                    childRows.add(new ChildRow(email,R.drawable.ic_menu_courier_payments));
+                    //childRows.add();
                     //childRows.add(new ChildRow("AAAABBBBBBBB",R.drawable.ic_menu_courier_payments));
-                    parentRow = new ParentRow(name, childRows);
+                    parentRow = new ParentRow(name, childRow);
                     parentList.add(parentRow);
 
 
@@ -130,13 +132,6 @@ public class MainWindow extends AppCompatActivity
 
             }
         });
-        //
-
-
-
-        displayList();
-
-        expandAll();
 
     }
 
@@ -191,9 +186,9 @@ public class MainWindow extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
@@ -208,9 +203,20 @@ public class MainWindow extends AppCompatActivity
 
             fragmentManager.beginTransaction()
                     .replace(R.id.content_main_window, new FragmentAddCourier())
-
                     .commit();
+            View v = this.findViewById(R.id.action_search1);
+            v.setVisibility(View.GONE);
+
         } else if (id == R.id.nav_suspend_courier) {
+            f.setExpListAdapter(expListAdapter);
+            f.setListView(listView);
+            f.setParentList(parentList);
+            f.setShowTheseParentList(showTheseParentList);
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_main_window,f )
+                    .commit();
+            View v = this.findViewById(R.id.action_search1);
+            v.setVisibility(View.VISIBLE);
 
         } else if (id == R.id.nav_suspend_customer) {
 
@@ -258,56 +264,38 @@ public class MainWindow extends AppCompatActivity
 
     @Override
     public boolean onClose() {
-        expListAdapter.filterData("");
+        f.getExpListAdapter().filterData("");
         expandAll();
         return false;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        expListAdapter.filterData(query);
-        expandAll();
+       // expListAdapter.filterData(query);
+        f.getExpListAdapter().filterData(query);
+        f.expandAll();
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newQuery) {
-        expListAdapter.filterData(newQuery);
-        expandAll();
+        f.getExpListAdapter().filterData(newQuery);
+
+        f.expandAll();
         return false;
     }
 
-    private void loadData(){
-        ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
-        ParentRow parentRow = null;
 
-        childRows.add(new ChildRow("AAAAAAAAA",R.mipmap.ic_launcher));
-        childRows.add(new ChildRow("AAAABBBBBBBB",R.mipmap.ic_launcher));
-        parentRow = new ParentRow("First Group", childRows);
-        parentList.add(parentRow);
-
-        childRows = new ArrayList<ChildRow>();
-        childRows.add(new ChildRow("KKKKKKKK",R.mipmap.ic_launcher));
-        childRows.add(new ChildRow("KKKKKKBBBBBBBB",R.mipmap.ic_launcher));
-        parentRow = new ParentRow("Second Group", childRows);
-        parentList.add(parentRow);
-
-
-    }
 
     private void expandAll(){
         int count = expListAdapter.getGroupCount();
         for(int i = 0;i<count;i++){
-            //listView.expandGroup(i);
-            listView.collapseGroup(i);
+            listView.expandGroup(i);
+            //listView.collapseGroup(i);
         }
     }
 
-    private void displayList(){
-        loadData();
 
-        listView = (ExpandableListView)findViewById(R.id.expandable_list_search);
-        expListAdapter = new ExpListAdapter(MainWindow.this,parentList);
-        listView.setAdapter(expListAdapter);
-    }
+
+
 }

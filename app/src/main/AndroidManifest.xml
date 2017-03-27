@@ -39,9 +39,10 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".Controller.MainWindowActivity"
+            android:name=".Controller.SuspendCourier"
             android:label="@string/title_activity_main_window"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Controller.UserProfile"></activity>
     </application>
 
 </manifest>

@@ -1,18 +1,16 @@
 package com.proximosolutions.nvoyadmin.Controller;
 
-import java.util.ArrayList;
-
 /**
  * Created by Isuru Tharanga on 3/26/2017.
  */
 
 public class ParentRow {
     private String name;
-    private ArrayList<ChildRow> childList;
+    private ChildRow child;
 
-    public ParentRow(String name, ArrayList<ChildRow> childList) {
+    public ParentRow(String name, ChildRow childList) {
         this.name = name;
-        this.childList = childList;
+        this.setChild(childList);
     }
 
     public String getName() {
@@ -23,11 +21,12 @@ public class ParentRow {
         this.name = name;
     }
 
-    public ArrayList<ChildRow> getChildList() {
-        return childList;
+
+    public ChildRow getChild() {
+        return child;
     }
 
-    public void setChildList(ArrayList<ChildRow> childList) {
-        this.childList = childList;
+    public void setChild(ChildRow child) {
+        this.child = child;
     }
 }
