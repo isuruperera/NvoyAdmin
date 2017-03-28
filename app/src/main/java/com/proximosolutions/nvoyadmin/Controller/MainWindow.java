@@ -1,12 +1,15 @@
 package com.proximosolutions.nvoyadmin.Controller;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -20,12 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.SearchView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,33 +32,32 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.proximosolutions.nvoyadmin.MainLogic.Courier;
-import com.proximosolutions.nvoyadmin.MainLogic.Nvoy;
+import com.proximosolutions.nvoyadmin.MainLogic.Customer;
 import com.proximosolutions.nvoyadmin.R;
 
 import java.util.ArrayList;
-
-import static com.proximosolutions.nvoyadmin.R.id.btn_add_courier;
-import static com.proximosolutions.nvoyadmin.R.id.contact_no;
-import static com.proximosolutions.nvoyadmin.R.id.email_address;
-import static com.proximosolutions.nvoyadmin.R.id.email_sign_in_button;
-import static com.proximosolutions.nvoyadmin.R.id.firstName;
-import static com.proximosolutions.nvoyadmin.R.id.lastName;
-import static com.proximosolutions.nvoyadmin.R.id.national_ic;
 
 public class MainWindow extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private FirebaseAuth mAuth;
     private Button addCourier;
-
     private SearchManager searchManager;
+    private SearchManager searchManagerCustomer;
     private SearchView searchView;
+    private SearchView searchViewCustomer;
     private ExpListAdapter expListAdapter;
+    private ExpListAdapterCustomer expListAdapterCustomer;
     private ExpandableListView listView;
+    private ExpandableListView listViewCustomer;
     private ArrayList<ParentRow> parentList = new ArrayList<ParentRow>();
+    private ArrayList<ParentRow> parentListCustomer = new ArrayList<ParentRow>();
     private ArrayList<ParentRow> showTheseParentList = new ArrayList<ParentRow>();
+    private ArrayList<ParentRow> showTheseParentListCustomer = new ArrayList<ParentRow>();
     private MenuItem searchItem;
-    FragmentSuspendCourier f;
+    FragmentSearchCourier fragmentSearchCourier;
+    FragmentSearchCustomer fragmentSearchCustomer;
+    private boolean isCourier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +65,8 @@ public class MainWindow extends AppCompatActivity
         setContentView(R.layout.activity_main_window);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        f = new FragmentSuspendCourier();
+        fragmentSearchCourier = new FragmentSearchCourier();
+        fragmentSearchCustomer = new FragmentSearchCustomer();
         /*//FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,49 +87,19 @@ public class MainWindow extends AppCompatActivity
 
         drawer.openDrawer(GravityCompat.START);
 
-        searchManager = (SearchManager)getSystemService(Context.SEARCH_SERVICE);
+        searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         parentList = new ArrayList<ParentRow>();
         showTheseParentList = new ArrayList<ParentRow>();
 
+        searchManagerCustomer = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        parentListCustomer = new ArrayList<ParentRow>();
+        showTheseParentListCustomer = new ArrayList<ParentRow>();
 
-        //
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference();
-        databaseReference.child("Couriers").addValueEventListener(new ValueEventListener(){
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                parentList = new ArrayList<ParentRow>();
-                Iterable<DataSnapshot> courierList = dataSnapshot.getChildren();
-                for(DataSnapshot courier:courierList){
-                    Courier tempCourier = courier.getValue(Courier.class);
-                    String name = tempCourier.getFirstName() + " " + tempCourier.getLastName();
-                    String email = tempCourier.getUserID();
-                    email = DecodeString(email);
-
-                    //ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
-                    ChildRow childRow = new ChildRow(email,R.drawable.ic_menu_courier_payments);
-                    ParentRow parentRow = null;
-
-                    //childRows.add();
-                    //childRows.add(new ChildRow("AAAABBBBBBBB",R.drawable.ic_menu_courier_payments));
-                    parentRow = new ParentRow(name, childRow);
-                    parentList.add(parentRow);
+        /*View v = this.findViewById(R.id.action_search1);
+        v.setVisibility(View.GONE);*/
 
 
 
-                }
-                listView = (ExpandableListView)findViewById(R.id.expandable_list_search);
-                expListAdapter = new ExpListAdapter(MainWindow.this,parentList);
-                listView.setAdapter(expListAdapter);
-                //displayList();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
     }
 
@@ -158,24 +126,36 @@ public class MainWindow extends AppCompatActivity
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_window, menu);
 
-        searchItem = menu.findItem(R.id.action_search1);
-        searchView = (SearchView)MenuItemCompat.getActionView(searchItem);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false);
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnCloseListener(this);
-        searchView.requestFocus();
+        if (isCourier) {
+            searchItem = menu.findItem(R.id.action_search1);
+
+            searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(false);
+            searchView.setOnQueryTextListener(this);
+            searchView.setOnCloseListener(this);
+            searchView.requestFocus();
+            //searchItem.setVisible(false);
+        } else {
+            searchItem = menu.findItem(R.id.action_search1);
+            searchViewCustomer = (SearchView) MenuItemCompat.getActionView(searchItem);
+            searchViewCustomer.setSearchableInfo(searchManagerCustomer.getSearchableInfo(getComponentName()));
+            searchViewCustomer.setIconifiedByDefault(false);
+            searchViewCustomer.setOnQueryTextListener(this);
+            searchViewCustomer.setOnCloseListener(this);
+            searchViewCustomer.requestFocus();
+            //searchItem.setVisible(false);
+        }
+
 
 
         return true;
     }
-
 
 
     @Override
@@ -207,22 +187,32 @@ public class MainWindow extends AppCompatActivity
             View v = this.findViewById(R.id.action_search1);
             v.setVisibility(View.GONE);
 
-        } else if (id == R.id.nav_suspend_courier) {
-            f.setExpListAdapter(expListAdapter);
-            f.setListView(listView);
-            f.setParentList(parentList);
-            f.setShowTheseParentList(showTheseParentList);
+        } else if (id == R.id.nav_search_courier) {
+            isCourier = true;
+            fragmentSearchCourier.setExpListAdapter(expListAdapter);
+            fragmentSearchCourier.setListView(listView);
+            fragmentSearchCourier.setParentList(parentList);
+            fragmentSearchCourier.setShowTheseParentList(showTheseParentList);
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_main_window,f )
+                    .replace(R.id.content_main_window, fragmentSearchCourier)
                     .commit();
             View v = this.findViewById(R.id.action_search1);
             v.setVisibility(View.VISIBLE);
 
-        } else if (id == R.id.nav_suspend_customer) {
 
-        } else if (id == R.id.nav_courier_payments) {
 
         } else if (id == R.id.nav_customer_payments) {
+            isCourier = false;
+            fragmentSearchCustomer.setExpListAdapter(expListAdapterCustomer);
+            fragmentSearchCustomer.setListView(listViewCustomer);
+            fragmentSearchCustomer.setParentList(parentListCustomer);
+            fragmentSearchCustomer.setShowTheseParentList(showTheseParentListCustomer);
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_main_window, fragmentSearchCustomer)
+                    .commit();
+            View v = this.findViewById(R.id.action_search1);
+            v.setVisibility(View.VISIBLE);
+
 
         } else if (id == R.id.nav_log_out) {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -235,10 +225,14 @@ public class MainWindow extends AppCompatActivity
                         .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
+                                        FirebaseAuth.getInstance().signOut();
+                                        onDestroy();
                                         moveTaskToBack(true);
                                         android.os.Process.killProcess(android.os.Process.myPid());
                                         System.exit(1);
-                                        FirebaseAuth.getInstance().signOut();
+                                        finish();
+
+
                                     }
                                 })
 
@@ -264,38 +258,64 @@ public class MainWindow extends AppCompatActivity
 
     @Override
     public boolean onClose() {
-        f.getExpListAdapter().filterData("");
+        if (isCourier) {
+            fragmentSearchCourier.getExpListAdapter().filterData("");
+        } else {
+            fragmentSearchCustomer.getExpListAdapter().filterData("");
+        }
+
         expandAll();
         return false;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-       // expListAdapter.filterData(query);
-        f.getExpListAdapter().filterData(query);
-        f.expandAll();
+        // expListAdapter.filterData(query);
+        if (isCourier) {
+            fragmentSearchCourier.getExpListAdapter().filterData(query);
+            fragmentSearchCourier.expandAll();
+        } else {
+            fragmentSearchCustomer.getExpListAdapter().filterData(query);
+            fragmentSearchCustomer.expandAll();
+        }
+
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newQuery) {
-        f.getExpListAdapter().filterData(newQuery);
+        if (isCourier) {
+            fragmentSearchCourier.getExpListAdapter().filterData(newQuery);
 
-        f.expandAll();
+            fragmentSearchCourier.expandAll();
+        } else {
+            fragmentSearchCustomer.getExpListAdapter().filterData(newQuery);
+
+            fragmentSearchCustomer.expandAll();
+        }
+
         return false;
     }
 
 
-
-    private void expandAll(){
-        int count = expListAdapter.getGroupCount();
-        for(int i = 0;i<count;i++){
-            listView.expandGroup(i);
-            //listView.collapseGroup(i);
+    private void expandAll() {
+        if (isCourier) {
+            int count = expListAdapter.getGroupCount();
+            for (int i = 0; i < count; i++) {
+                listView.expandGroup(i);
+                //listView.collapseGroup(i);
+            }
+        } else {
+            int count = expListAdapterCustomer.getGroupCount();
+            for (int i = 0; i < count; i++) {
+                listViewCustomer.expandGroup(i);
+                //listView.collapseGroup(i);
+            }
         }
+
     }
 
 
-
-
 }
+
+

@@ -2,40 +2,35 @@ package com.proximosolutions.nvoyadmin.Controller;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.proximosolutions.nvoyadmin.MainLogic.Courier;
+import com.proximosolutions.nvoyadmin.MainLogic.Customer;
 import com.proximosolutions.nvoyadmin.MainLogic.NvoyUser;
 import com.proximosolutions.nvoyadmin.R;
 
 import java.util.ArrayList;
 
-import static com.proximosolutions.nvoyadmin.Controller.IntentLock.lockActivity;
-import static com.proximosolutions.nvoyadmin.Controller.IntentLock.lockIntent;
-
 /**
  * Created by Isuru Tharanga on 3/26/2017.
  */
 
-public class ExpListAdapter extends BaseExpandableListAdapter {
+public class ExpListAdapterCustomer extends BaseExpandableListAdapter {
 
     private Context context;
     private ArrayList<ParentRow> parentRowList;
     private ArrayList<ParentRow> originalList;
 
-    public ExpListAdapter(Context context, ArrayList<ParentRow> originalList) {
+    public ExpListAdapterCustomer(Context context, ArrayList<ParentRow> originalList) {
         this.context = context;
         this.parentRowList = new ArrayList<>();
         this.parentRowList.addAll(originalList);
@@ -131,7 +126,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                         //final ValueEventListener valueEventListener =
                         String str = ((TextView)childText.findViewById(R.id.child_text)).getText().toString();
 
-                       databaseReference.child("Couriers").child(EncodeString(str.trim())).addValueEventListener(new ValueEventListener(){
+                       databaseReference.child("Customers").child(EncodeString(str.trim())).addValueEventListener(new ValueEventListener(){
 
 
                            @Override
@@ -140,7 +135,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                                    DatabaseReference databaseReference = firebaseDatabase.getReference();*/
 
                                    Intent userProfile = new Intent(finalConvertView.getContext(),UserProfile.class);
-                                   Courier user = dataSnapshot.getValue(Courier.class);
+                                   Customer user = dataSnapshot.getValue(Customer.class);
 
                                    //Iterable<DataSnapshot> snap = dataSnapshot.getChildren();
 //                                   System.out.println((user.getFirstName()+" "+user.getLastName()));
@@ -149,12 +144,11 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                                    userProfile.putExtra("contact_no",user.getContactNumber());
                                    userProfile.putExtra("nic",user.getNic());
                                    userProfile.putExtra("isActive",user.isActive());
-                                   userProfile.putExtra("type",user.isExpressCourier());
-                                   userProfile.putExtra("isCourier",true);
+                                   userProfile.putExtra("isCourier",false);
+                                   //userProfile.putExtra("type",user.isExpressCourier());
                                    //lockActivity = false;
-                                   databaseReference.child("Couriers").child(EncodeString(((TextView)childText.findViewById(R.id.child_text)).getText().toString().trim())).removeEventListener(this);
+                                   databaseReference.child("Customers").child(EncodeString(((TextView)childText.findViewById(R.id.child_text)).getText().toString().trim())).removeEventListener(this);
                                    context.startActivity(userProfile);
-                                    databaseReference.removeEventListener(this);
 
 
 
@@ -178,7 +172,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
         );
 
 
-        System.out.println(((TextView)convertView.findViewById(R.id.child_text)).getText().toString());
+        //System.out.println(((TextView)convertView.findViewById(R.id.child_text)).getText().toString());
         return convertView;
     }
 
@@ -228,5 +222,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
         notifyDataSetChanged();
 
     }
+
+
 
 }

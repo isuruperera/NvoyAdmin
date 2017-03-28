@@ -258,6 +258,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                         Toast.LENGTH_SHORT).show();
                                 Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
                                 startActivity(mainWindow);
+                                finish();
 
                             }
 

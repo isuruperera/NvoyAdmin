@@ -19,7 +19,8 @@
 
         <activity
             android:name=".Controller.LoginActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,7 +31,8 @@
             android:name=".Controller.MainWindow"
             android:label="@string/title_activity_main_window"
             android:parentActivityName=".Controller.LoginActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:noHistory="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.proximosolutions.nvoyadmin.Controller.LoginActivity" />
@@ -44,7 +46,7 @@
 
 
         <activity
-            android:name=".Controller.SuspendCourier"
+            android:name=".Controller.SearchCourier"
             android:label="@string/title_activity_main_window"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Controller.UserProfile"></activity>

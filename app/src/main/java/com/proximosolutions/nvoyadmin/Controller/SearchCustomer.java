@@ -1,39 +1,31 @@
 package com.proximosolutions.nvoyadmin.Controller;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.SearchView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.proximosolutions.nvoyadmin.MainLogic.Courier;
-import com.proximosolutions.nvoyadmin.MainLogic.NvoyUser;
+import com.proximosolutions.nvoyadmin.MainLogic.Customer;
 import com.proximosolutions.nvoyadmin.R;
 
 import java.util.ArrayList;
 
-public class SuspendCourier extends AppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+public class SearchCustomer extends AppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private SearchManager searchManager;
     private SearchView searchView;
-    private ExpListAdapter expListAdapter;
+    private ExpListAdapterCustomer expListAdapter;
     private ExpandableListView listView;
     private ArrayList<ParentRow> parentList = new ArrayList<ParentRow>();
     private ArrayList<ParentRow> showTheseParentList = new ArrayList<ParentRow>();
@@ -47,14 +39,14 @@ public class SuspendCourier extends AppCompatActivity implements SearchView.OnQu
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         searchManager = (SearchManager)getSystemService(Context.SEARCH_SERVICE);
         parentList = new ArrayList<ParentRow>();
@@ -64,20 +56,25 @@ public class SuspendCourier extends AppCompatActivity implements SearchView.OnQu
 
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         DatabaseReference databaseReference = firebaseDatabase.getReference();
-        databaseReference.child("Couriers").addValueEventListener(new ValueEventListener(){
+        databaseReference.child("Customers").addValueEventListener(new ValueEventListener(){
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 parentList = new ArrayList<ParentRow>();
-                Iterable<DataSnapshot> courierList = dataSnapshot.getChildren();
-                for(DataSnapshot courier:courierList){
-                    Courier tempCourier = courier.getValue(Courier.class);
+                Iterable<DataSnapshot> customerList = dataSnapshot.getChildren();
+                for(DataSnapshot courier:customerList){
+                    Customer tempCourier = courier.getValue(Customer.class);
                     String name = tempCourier.getFirstName() + " " + tempCourier.getLastName();
                     String email = tempCourier.getUserID();
                     email = DecodeString(email);
-
+                    String tempStatus = "";
+                    if(tempCourier.isActive()){
+                        tempStatus = "Status: Active";
+                    }else{
+                        tempStatus = "Status: Suspended";
+                    }
                     //ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
-                    ChildRow childRow = new ChildRow(email,R.drawable.ic_menu_courier_payments);
+                    ChildRow childRow = new ChildRow(email,tempStatus,R.drawable.ic_menu_courier_payments);
                     ParentRow parentRow = null;
 
                     //childRows.add(new ChildRow(email,R.drawable.ic_menu_courier_payments));
@@ -88,8 +85,8 @@ public class SuspendCourier extends AppCompatActivity implements SearchView.OnQu
 
 
                 }
-                listView = (ExpandableListView)findViewById(R.id.expandable_list_search);
-                expListAdapter = new ExpListAdapter(SuspendCourier.this,parentList);
+                listView = (ExpandableListView)findViewById(R.id.expandable_list_search_courier);
+                expListAdapter = new ExpListAdapterCustomer(SearchCustomer.this,parentList);
                 listView.setAdapter(expListAdapter);
                 //displayList();
             }
@@ -188,8 +185,8 @@ public class SuspendCourier extends AppCompatActivity implements SearchView.OnQu
 
     private void displayList(){
         //loadData();
-        listView = (ExpandableListView)findViewById(R.id.expandable_list_search);
-        expListAdapter = new ExpListAdapter(SuspendCourier.this,parentList);
+        listView = (ExpandableListView)findViewById(R.id.expandable_list_search_courier);
+        expListAdapter = new ExpListAdapterCustomer(SearchCustomer.this,parentList);
         listView.setAdapter(expListAdapter);
     }
 

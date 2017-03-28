@@ -7,10 +7,11 @@ package com.proximosolutions.nvoyadmin.Controller;
 public class ChildRow {
     private int icon;
     private String text;
-
-    public ChildRow(String text, int icon) {
+    private String status;
+    public ChildRow(String text,String status, int icon) {
         this.text = text;
         this.icon = icon;
+        this.status = status;
     }
 
     public int getIcon() {
@@ -27,5 +28,13 @@ public class ChildRow {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

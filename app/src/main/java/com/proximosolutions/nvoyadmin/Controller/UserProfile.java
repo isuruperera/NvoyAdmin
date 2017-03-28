@@ -1,8 +1,10 @@
 package com.proximosolutions.nvoyadmin.Controller;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -12,18 +14,26 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.proximosolutions.nvoyadmin.R;
 
 import static com.proximosolutions.nvoyadmin.Controller.IntentLock.lockIntent;
 
 public class UserProfile extends AppCompatActivity {
 
-    //View
+    Button suspendBtn;
+    Button viewTransactionsBtn;
+    String currentUserType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +51,114 @@ public class UserProfile extends AppCompatActivity {
                 //((android.support.design.widget.CollapsingToolbarLayout)findViewById(R.id.user_profile_toolbar)).set
                 //String s = extras.get("email").toString();
                 ((TextView)findViewById(R.id.user_email)).setText(extras.get("email").toString());
+                ((TextView)findViewById(R.id.user_contact_no)).setText(extras.get("contact_no").toString());
+                ((TextView)findViewById(R.id.user_nic)).setText(extras.get("nic").toString());
+
+
+                if(extras.get("isActive").equals(true)){
+                    ((TextView)findViewById(R.id.user_is_active)).setText("Active");
+                    ((Button)findViewById(R.id.btn_suspend_courier)).setText("Suspend");
+                }else{
+                    ((TextView)findViewById(R.id.user_is_active)).setText("Suspended");
+                    ((Button)findViewById(R.id.btn_suspend_courier)).setText("Activate");
+                }
+                if(extras.get("isCourier").equals(true)){
+                    if(extras.get("type").equals(true)){
+                        ((TextView)findViewById(R.id.user_type)).setText("Express Courier");
+                    }else{
+                        ((TextView)findViewById(R.id.user_type)).setText("Regular Courier");
+                    }
+                    //currentUserType = "Couriers";
+                }else{
+                    ((TextView)findViewById(R.id.user_type)).setText("Customer");
+                    //currentUserType = "Customers";
+
+                }
+
             }
         }else{
             ((TextView)findViewById(R.id.user_email)).setText((String)savedInstanceState.getSerializable("email"));
+            ((TextView)findViewById(R.id.contact_no)).setText((String)savedInstanceState.getSerializable("contact_no"));
+            ((TextView)findViewById(R.id.user_nic)).setText((String)savedInstanceState.getSerializable("nic"));
+            if(savedInstanceState.getSerializable("isActive").equals(true)){
+                ((TextView)findViewById(R.id.user_is_active)).setText("Active");
+                ((Button)findViewById(R.id.btn_suspend_courier)).setText("Suspend");
+            }else{
+                ((TextView)findViewById(R.id.user_is_active)).setText("Suspended");
+                ((Button)findViewById(R.id.btn_suspend_courier)).setText("Activate");
+            }
+
+            if(savedInstanceState.getSerializable("isCourier").equals(true)){
+                if(savedInstanceState.getSerializable("type").equals(true)){
+                    ((TextView)findViewById(R.id.user_type)).setText("Express Courier");
+                }else{
+                    ((TextView)findViewById(R.id.user_type)).setText("Regular Courier");
+                }
+                //currentUserType = "Couriers";
+            }else{
+                ((TextView)findViewById(R.id.user_type)).setText("Customer");
+                //currentUserType = "Customers";
+            }
+
+
+
+
         }
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        final DatabaseReference databaseReference = firebaseDatabase.getReference();
+        suspendBtn = (Button) findViewById(R.id.btn_suspend_courier);
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        suspendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                alertDialogBuilder.setTitle("Change user status?");
+                alertDialogBuilder
+                        .setMessage("Click yes to change!")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        if((((TextView)findViewById(R.id.user_type)).getText()).equals("Customer")){
+                                            currentUserType = "Customers";
+                                        }else{
+                                            currentUserType = "Couriers";
+                                        }
+
+
+                                        if((((TextView)findViewById(R.id.user_is_active)).getText()).equals("Active")){
+                                            databaseReference.child(currentUserType).child(EncodeString(((TextView)findViewById(R.id.user_email)).getText().toString())).child("active").setValue(false);
+                                            Toast.makeText(UserProfile.this, "User Suspended",
+                                                    Toast.LENGTH_LONG).show();
+
+                                            ((TextView)findViewById(R.id.user_is_active)).setText("Suspended");
+                                            ((Button)findViewById(R.id.btn_suspend_courier)).setText("Activate");
+                                        }else{
+                                            databaseReference.child(currentUserType).child(EncodeString(((TextView)findViewById(R.id.user_email)).getText().toString())).child("active").setValue(true);
+                                            Toast.makeText(UserProfile.this, "User Activated",
+                                                    Toast.LENGTH_LONG).show();
+                                            ((TextView)findViewById(R.id.user_is_active)).setText("Active");
+                                            ((Button)findViewById(R.id.btn_suspend_courier)).setText("Suspend");
+                                        }
+                                    }
+                                })
+
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+
+
+
+
+
+            }
+        });
 
         //(new TextView(R.id.action_search1));
 

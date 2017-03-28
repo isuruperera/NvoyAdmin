@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/parent_text"
         android:paddingLeft="50sp"
-        android:layout_margin="10sp"
+        android:layout_margin="20sp"
         android:textAppearance="?android:textAppearanceMedium"
         android:textStyle="bold"/>
 

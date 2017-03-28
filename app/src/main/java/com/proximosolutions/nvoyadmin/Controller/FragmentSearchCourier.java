@@ -25,7 +25,7 @@ import java.util.ArrayList;
  * Created by Isuru Tharanga on 3/27/2017.
  */
 
-public class FragmentSuspendCourier extends Fragment implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+public class FragmentSearchCourier extends Fragment implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     View suspendCourier;
 
     //
@@ -36,7 +36,7 @@ public class FragmentSuspendCourier extends Fragment implements SearchView.OnQue
     private ArrayList<ParentRow> parentList = new ArrayList<ParentRow>();
     private ArrayList<ParentRow> showTheseParentList = new ArrayList<ParentRow>();
     private MenuItem searchItem;
-    //private SuspendCourier
+    //private SearchCourier
     //
 
 
@@ -58,8 +58,14 @@ public class FragmentSuspendCourier extends Fragment implements SearchView.OnQue
                     String name = tempCourier.getFirstName() + " " + tempCourier.getLastName();
                     String email = tempCourier.getUserID();
                     email = DecodeString(email);
-
-                    ChildRow childRow = new ChildRow(email,R.drawable.ic_menu_courier_payments);
+                    String tempStatus = "";
+                    if(tempCourier.isActive()){
+                        tempStatus = "Status: Active";
+                    }else{
+                        tempStatus = "Status: Suspended";
+                    }
+                    //ArrayList<ChildRow> childRows = new ArrayList<ChildRow>();
+                    ChildRow childRow = new ChildRow(email,tempStatus,R.drawable.ic_menu_courier_payments);
                     ParentRow parentRow = null;
                     //childRows.add();
                     //childRows.add(new ChildRow("AAAABBBBBBBB",R.drawable.ic_menu_courier_payments));
@@ -68,7 +74,7 @@ public class FragmentSuspendCourier extends Fragment implements SearchView.OnQue
 
 
                 }
-                setListView((ExpandableListView) getView().findViewById(R.id.expandable_list_search));
+                setListView((ExpandableListView) getView().findViewById(R.id.expandable_list_search_courier));
                 setExpListAdapter(new ExpListAdapter(suspendCourier.getContext(), getParentList()));
                 getListView().setAdapter(getExpListAdapter());
                 //displayList();
@@ -84,7 +90,7 @@ public class FragmentSuspendCourier extends Fragment implements SearchView.OnQue
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        suspendCourier = inflater.inflate(R.layout.suspend_courier,container,false);
+        suspendCourier = inflater.inflate(R.layout.search_courier,container,false);
         return suspendCourier;
 
     }

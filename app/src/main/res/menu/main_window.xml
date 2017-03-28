@@ -11,7 +11,8 @@
         android:id="@+id/action_search1"
         android:orderInCategory="100"
         android:title="Search User"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/search_icon"
+        android:tint="@color/common_google_signin_btn_text_dark_pressed"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView"/>
 </menu>

@@ -63,6 +63,7 @@ public class FragmentAddCourier extends Fragment {
                 courier.setContactNumber(((TextView)addCourier.findViewById(contact_no)).getText().toString());
                 courier.setNic(((TextView)addCourier.findViewById(national_ic)).getText().toString());
                 courier.setExpressCourier(((CheckBox)addCourier.findViewById(expressCourier)).isChecked());
+                courier.setActive(true);
                 addCourier(courier);
                 ((TextView)addCourier.findViewById(email_address)).setText("");
                 ((TextView)addCourier.findViewById(firstName)).setText("");

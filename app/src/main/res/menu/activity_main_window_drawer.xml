@@ -7,22 +7,14 @@
             android:icon="@drawable/ic_menu_add_courier"
             android:title="Add Courier" />
         <item
-            android:id="@+id/nav_suspend_courier"
-            android:icon="@drawable/ic_menu_suspend_courier"
-            android:title="Suspend Courier" />
-        <item
-            android:id="@+id/nav_suspend_customer"
-            android:icon="@drawable/ic_menu_suspend_customer"
-            android:title="Suspend Customer" />
-        <item
-            android:id="@+id/nav_courier_payments"
-            android:icon="@drawable/ic_menu_courier_payments"
-            android:title="Courier Payments" />
+            android:id="@+id/nav_search_courier"
+            android:icon="@drawable/search_icon"
+            android:title="Search Couriers" />
 
         <item
             android:id="@+id/nav_customer_payments"
-            android:icon="@drawable/ic_menu_customer_payments"
-            android:title="Customer Payments" />
+            android:icon="@drawable/search_icon"
+            android:title="Search Customers" />
     </group>
 
     <item android:title="Options">
