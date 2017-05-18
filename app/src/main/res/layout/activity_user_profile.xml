@@ -97,7 +97,7 @@
             android:layout_height="60dp"
             android:layout_gravity="end"
             android:layout_weight="1"
-            android:text="View transactions"
+            android:text=""
             android:id="@+id/btn_view_transactions_courier"
             android:background="@drawable/ripple_effect"
             android:textColor="@color/common_google_signin_btn_text_dark_default"

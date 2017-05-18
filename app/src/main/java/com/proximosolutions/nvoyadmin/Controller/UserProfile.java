@@ -12,6 +12,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -38,18 +39,13 @@ public class UserProfile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //lockIntent = true;
-            //this.setActionBar(new ActionBar());
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-           // getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_user_profile);
-        //String userName = (String)savedInstanceState.get("userName");
+
         if(savedInstanceState == null){
             Bundle extras = getIntent().getExtras();
             if(extras != null){
                 ((android.support.design.widget.CollapsingToolbarLayout)findViewById(R.id.user_profile_toolbar)).setTitle(extras.get("userName").toString());
-                //((android.support.design.widget.CollapsingToolbarLayout)findViewById(R.id.user_profile_toolbar)).set
-                //String s = extras.get("email").toString();
                 ((TextView)findViewById(R.id.user_email)).setText(extras.get("email").toString());
                 ((TextView)findViewById(R.id.user_contact_no)).setText(extras.get("contact_no").toString());
                 ((TextView)findViewById(R.id.user_nic)).setText(extras.get("nic").toString());
@@ -68,10 +64,9 @@ public class UserProfile extends AppCompatActivity {
                     }else{
                         ((TextView)findViewById(R.id.user_type)).setText("Regular Courier");
                     }
-                    //currentUserType = "Couriers";
+
                 }else{
                     ((TextView)findViewById(R.id.user_type)).setText("Customer");
-                    //currentUserType = "Customers";
 
                 }
 
@@ -94,10 +89,8 @@ public class UserProfile extends AppCompatActivity {
                 }else{
                     ((TextView)findViewById(R.id.user_type)).setText("Regular Courier");
                 }
-                //currentUserType = "Couriers";
             }else{
                 ((TextView)findViewById(R.id.user_type)).setText("Customer");
-                //currentUserType = "Customers";
             }
 
 
@@ -108,6 +101,7 @@ public class UserProfile extends AppCompatActivity {
         final DatabaseReference databaseReference = firebaseDatabase.getReference();
         suspendBtn = (Button) findViewById(R.id.btn_suspend_courier);
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        Log.d("Suspend User","Started");
         suspendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -121,7 +115,9 @@ public class UserProfile extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int id) {
                                         if((((TextView)findViewById(R.id.user_type)).getText()).equals("Customer")){
                                             currentUserType = "Customers";
+                                            Log.d("Suspend User","Customer detected");
                                         }else{
+                                            Log.d("Suspend User","Courier detected");
                                             currentUserType = "Couriers";
                                         }
 
@@ -140,6 +136,7 @@ public class UserProfile extends AppCompatActivity {
                                             ((TextView)findViewById(R.id.user_is_active)).setText("Active");
                                             ((Button)findViewById(R.id.btn_suspend_courier)).setText("Suspend");
                                         }
+                                        Log.d("Suspend User","Status Changed");
                                     }
                                 })
 
@@ -159,8 +156,6 @@ public class UserProfile extends AppCompatActivity {
 
             }
         });
-
-        //(new TextView(R.id.action_search1));
 
     }
 

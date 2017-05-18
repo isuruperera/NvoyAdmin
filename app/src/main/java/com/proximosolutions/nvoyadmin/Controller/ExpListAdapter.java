@@ -3,6 +3,7 @@ package com.proximosolutions.nvoyadmin.Controller;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -155,6 +156,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
                                    databaseReference.child("Couriers").child(EncodeString(((TextView)childText.findViewById(R.id.child_text)).getText().toString().trim())).removeEventListener(this);
                                    context.startActivity(userProfile);
                                     databaseReference.removeEventListener(this);
+                               Log.d("Database","Data Change listener removed from Couriers node");
 
 
 
@@ -169,7 +171,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
 
 
                        });
-
+                        Log.d("Database","Data Change listener attached to Couriers node");
 
 
                     }
@@ -225,6 +227,7 @@ public class ExpListAdapter extends BaseExpandableListAdapter {
             }
 
         }
+        Log.d("Search","Query changed");
         notifyDataSetChanged();
 
     }

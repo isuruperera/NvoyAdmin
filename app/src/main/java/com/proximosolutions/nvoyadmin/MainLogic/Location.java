@@ -5,22 +5,22 @@ package com.proximosolutions.nvoyadmin.MainLogic;
  */
 
 public class Location {
-    private double longitude;
-    private double altitude;
+    private String longitude;
+    private String latitude;
 
-    public double getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 
-    public double getAltitude() {
-        return altitude;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 }

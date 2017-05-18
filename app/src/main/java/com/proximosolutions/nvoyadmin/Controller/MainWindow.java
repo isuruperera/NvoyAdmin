@@ -5,9 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -17,6 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -61,6 +64,7 @@ public class MainWindow extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("Main Window","Created");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_window);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -98,7 +102,18 @@ public class MainWindow extends AppCompatActivity
         /*View v = this.findViewById(R.id.action_search1);
         v.setVisibility(View.GONE);*/
 
-
+        /*IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.package.ACTION_LOGOUT");
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("onReceive","Logout in progress");
+                //At this point you should start the login activity and finish this one
+                System.out.println("REC!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                finish();
+            }
+        }, intentFilter);
+*/
 
 
     }
@@ -225,12 +240,23 @@ public class MainWindow extends AppCompatActivity
                         .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
+                                        Log.d("User Status","Signed out");
                                         FirebaseAuth.getInstance().signOut();
-                                        onDestroy();
-                                        moveTaskToBack(true);
+                                        //onDestroy();
+
+                                        /*Intent broadcastIntent = new Intent();
+                                        broadcastIntent.setAction("com.package.ACTION_LOGOUT");
+                                        sendBroadcast(broadcastIntent);*/
+
+                                        Intent loginActivity = new Intent(MainWindow.this,LoginActivity.class);
+                                        startActivity(loginActivity);
+                                        loginActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+
+                                        /*moveTaskToBack(true);
                                         android.os.Process.killProcess(android.os.Process.myPid());
-                                        System.exit(1);
-                                        finish();
+                                        System.exit(1);*/
+
 
 
                                     }
@@ -315,7 +341,17 @@ public class MainWindow extends AppCompatActivity
 
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("App","Resumed login status checked");
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if(user==null){
+            Intent loginActivity = new Intent(MainWindow.this,LoginActivity.class);
+            startActivity(loginActivity);
+        }
+    }
 }
 
 

@@ -18,10 +18,10 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/nvoy_logo_admin"
         android:id="@+id/imageView2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
         android:adjustViewBounds="false"
         android:visibility="invisible"
-        android:alpha="10" />
+        android:alpha="10"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

@@ -4,10 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,21 +58,50 @@ public class FragmentAddCourier extends Fragment {
             @Override
             public void onClick(View view) {
                 showProgress(true);
-                Courier courier = new Courier();
-                courier.setUserID(EncodeString(((TextView)addCourier.findViewById(email_address)).getText().toString()));
-                courier.setFirstName(((TextView)addCourier.findViewById(firstName)).getText().toString());
-                courier.setLastName(((TextView)addCourier.findViewById(lastName)).getText().toString());
-                courier.setContactNumber(((TextView)addCourier.findViewById(contact_no)).getText().toString());
-                courier.setNic(((TextView)addCourier.findViewById(national_ic)).getText().toString());
-                courier.setExpressCourier(((CheckBox)addCourier.findViewById(expressCourier)).isChecked());
-                courier.setActive(true);
-                addCourier(courier);
-                ((TextView)addCourier.findViewById(email_address)).setText("");
-                ((TextView)addCourier.findViewById(firstName)).setText("");
-                ((TextView)addCourier.findViewById(lastName)).setText("");
-                ((TextView)addCourier.findViewById(national_ic)).setText("");
-                ((TextView)addCourier.findViewById(contact_no)).setText("");
-                Toast.makeText(getActivity(), "Successfully added the user!", Toast.LENGTH_SHORT).show();
+                if(validateInputs()){
+                    Log.d("Add Courier","Inputs Valid");
+                    Courier courier = new Courier();
+                    courier.setUserID(EncodeString(((TextView)addCourier.findViewById(email_address)).getText().toString()));
+                    courier.setFirstName(((TextView)addCourier.findViewById(firstName)).getText().toString());
+                    courier.setLastName(((TextView)addCourier.findViewById(lastName)).getText().toString());
+                    courier.setContactNumber(((TextView)addCourier.findViewById(contact_no)).getText().toString());
+                    courier.setNic(((TextView)addCourier.findViewById(national_ic)).getText().toString());
+                    courier.setExpressCourier(((CheckBox)addCourier.findViewById(expressCourier)).isChecked());
+                    com.proximosolutions.nvoyadmin.MainLogic.Location location = new com.proximosolutions.nvoyadmin.MainLogic.Location();
+                    location.setLongitude("");
+                    location.setLatitude("");
+                    courier.setActive(true);
+                    addCourier(courier);
+                    final Courier fCourier = courier;
+                    mAuth = FirebaseAuth.getInstance();
+                    Log.d("Add Courier","User Creation started in auth system");
+                    mAuth.createUserWithEmailAndPassword(DecodeString(courier.getUserID()), courier.getNic())
+                            .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    Log.d("Add Courier","User Creation Success");
+                                    if(task.isSuccessful()){
+                                        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+                                        mDatabase.child("Couriers").child(fCourier.getUserID()).setValue(fCourier);
+                                        mAuth.sendPasswordResetEmail(DecodeString(fCourier.getUserID()));
+                                        ((TextView)addCourier.findViewById(email_address)).setText("");
+                                        ((TextView)addCourier.findViewById(firstName)).setText("");
+                                        ((TextView)addCourier.findViewById(lastName)).setText("");
+                                        ((TextView)addCourier.findViewById(national_ic)).setText("");
+                                        ((TextView)addCourier.findViewById(contact_no)).setText("");
+                                        Toast.makeText(getActivity(), "Successfully added the user!", Toast.LENGTH_SHORT).show();
+                                    }else{
+                                        Log.d("Add Courier","User Creation failed. User already exist");
+                                        ((TextView)addCourier.findViewById(email_address)).setError("Email already exists");
+                                    }
+
+                                }
+                            });
+
+
+                }else{
+                    Log.d("Add Courier","Inputs Invalid");
+                }
                 showProgress(false);
 
 
@@ -81,15 +112,46 @@ public class FragmentAddCourier extends Fragment {
 
     }
 
+    private boolean validateInputs(){
+        boolean isValid = true;
+        if(!(((TextView)addCourier.findViewById(email_address)).getText()).toString().contains("@")){
+            isValid = false;
+            ((TextView)addCourier.findViewById(email_address)).setError("Invalid Email");
+        }
+        if((((TextView)addCourier.findViewById(firstName)).getText()).toString().equals("")){
+            isValid = false;
+            ((TextView)addCourier.findViewById(firstName)).setError("This cannot be empty");
+        }
+        if((((TextView)addCourier.findViewById(lastName)).getText()).toString().equals("")){
+            isValid = false;
+            ((TextView)addCourier.findViewById(lastName)).setError("This cannot be empty");
+        }
+        if((((TextView)addCourier.findViewById(national_ic)).getText()).toString().equals("")){
+            isValid = false;
+            ((TextView)addCourier.findViewById(national_ic)).setError("This cannot be empty");
+        }
+        if((((TextView)addCourier.findViewById(contact_no)).getText()).toString().equals("")){
+            isValid = false;
+            ((TextView)addCourier.findViewById(contact_no)).setError("This cannot be empty");
+        }
+        if(!(((TextView)addCourier.findViewById(national_ic)).getText()).toString().toUpperCase().endsWith("V")){
+            isValid = false;
+            ((TextView)addCourier.findViewById(national_ic)).setError("NIC is not valid");
+        }
+        if((((TextView)addCourier.findViewById(contact_no)).getText()).toString().length()!=10){
+            isValid = false;
+            ((TextView)addCourier.findViewById(contact_no)).setError("Contact number is not valid");
+        }
+        return isValid;
+    }
 
-    public void addCourier(Courier courier){
-        mAuth = FirebaseAuth.getInstance();
-        mAuth.createUserWithEmailAndPassword(DecodeString(courier.getUserID()), courier.getNic());
+
+    private boolean addCourier(final Courier courier){
 
 
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        mDatabase.child("Couriers").child(courier.getUserID()).setValue(courier);
 
+
+        return  true;
     }
 
     public static String EncodeString(String string) {

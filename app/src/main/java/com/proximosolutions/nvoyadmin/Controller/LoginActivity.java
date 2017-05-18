@@ -3,7 +3,10 @@ package com.proximosolutions.nvoyadmin.Controller;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -37,6 +40,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.proximosolutions.nvoyadmin.MainLogic.Admin;
 import com.proximosolutions.nvoyadmin.MainLogic.Nvoy;
 import com.proximosolutions.nvoyadmin.R;
 
@@ -81,19 +90,56 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
+        showProgress(true);
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                showProgress(false);
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    // User is signed in
-                   // Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    Toast.makeText(LoginActivity.this, "Authentication success.",
-                            Toast.LENGTH_SHORT).show();
-                    Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
-                    //Nvoy nvoy = new Nvoy();
-                    //mainWindow.
-                    startActivity(mainWindow);
+                    showProgress(true);
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference dataReference = database.getReference();
+
+                    dataReference.child("Admin").child(EncodeString(user.getEmail())).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            showProgress(false);
+                            Admin admin = dataSnapshot.getValue(Admin.class);
+                            if(admin==null){
+                                Log.d("Null Admin","Null admin detected");
+                                Log.d("User Status","Signed out");
+                                Toast.makeText(LoginActivity.this, "Invalid User!",
+                                        Toast.LENGTH_SHORT).show();
+                                Log.d("User Status","Signed out: invalid user");
+                                mAuth.signOut();
+                            }else{
+                                if(admin.isActive()){
+                                    Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
+                                    startActivity(mainWindow);
+                                    finish();
+                                }else{
+                                    Toast.makeText(LoginActivity.this, "Suspended User detected!",
+                                            Toast.LENGTH_SHORT).show();
+                                    Log.d("User Status","Signed out: suspended user");
+                                    FirebaseAuth.getInstance().signOut();
+
+                                    Intent loginActivity = new Intent(LoginActivity.this,LoginActivity.class);
+                                    startActivity(loginActivity);
+                                    loginActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    //
                 } else {
                     mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
                     populateAutoComplete();
@@ -124,10 +170,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // ...
             }
         };
-
-
-
-
 
     }
 
@@ -204,7 +246,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        final String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -237,44 +279,90 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
             //Log.w("signIn start first "));
-            Toast.makeText(LoginActivity.this, "Authentication start",
-                    Toast.LENGTH_SHORT).show();
+
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
+                            showProgress(false);
                             //Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
                             Log.w("signIn start", task.getException());
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
+
                             if (!task.isSuccessful()) {
                                 Log.w("signInWithEmail", task.getException());
+
                                 Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
 
+                                ((TextView)findViewById(R.id.password)).setError("Wrong Password!");
+
                             }else{
-                                Toast.makeText(LoginActivity.this, "Authentication success.",
-                                        Toast.LENGTH_SHORT).show();
-                                Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
-                                startActivity(mainWindow);
-                                finish();
+
+                                showProgress(true);
+                                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                DatabaseReference dataReference = database.getReference();
+
+                                dataReference.child("Admin").child(EncodeString(email)).addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        showProgress(false);
+                                        Admin admin = dataSnapshot.getValue(Admin.class);
+                                        if(admin==null){
+                                            Log.d("Null Admin","Null admin detected");
+                                            Log.d("User Status","Signed out");
+                                            FirebaseAuth.getInstance().signOut();
+
+                                            Intent loginActivity = new Intent(LoginActivity.this,LoginActivity.class);
+                                            startActivity(loginActivity);
+                                            loginActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                        }else{
+                                            if(admin.isActive()){
+                                                Intent mainWindow = new Intent(LoginActivity.this,MainWindow.class);
+                                                startActivity(mainWindow);
+                                                finish();
+                                            }else{
+                                                Toast.makeText(LoginActivity.this, "Suspended User detected!",
+                                                        Toast.LENGTH_SHORT).show();
+                                                Log.d("User Status","Signed out: suspended user");
+                                                FirebaseAuth.getInstance().signOut();
+
+                                                Intent loginActivity = new Intent(LoginActivity.this,LoginActivity.class);
+                                                startActivity(loginActivity);
+                                                loginActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                            }
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
 
                             }
 
 
-                            // ...
-                            showProgress(false);
                         }
                     });
 
-            //showProgress(false);
-            //mAuthTask = new UserLoginTask(email, password);
-           // mAuthTask.execute((Void) null);
         }
     }
 
 
+    public static String EncodeString(String string) {
+        return string.replace(".", ",");
+    }
+
+    public static String DecodeString(String string) {
+        return string.replace(",", ".");
+    }
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
@@ -294,32 +382,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        if(mProgressView!=null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+                int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                        show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    }
+                });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                mProgressView.animate().setDuration(shortAnimTime).alpha(
+                        show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                    }
+                });
+            } else {
+                // The ViewPropertyAnimator APIs are not available, so simply show
+                // and hide the relevant UI components.
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
         }
+
     }
 
     @Override
@@ -376,61 +467,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    /*public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        *//*@Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }*/
-
-        /*@Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }*/
-    //}
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        moveTaskToBack(true);
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(1);
+    }
 }
 
